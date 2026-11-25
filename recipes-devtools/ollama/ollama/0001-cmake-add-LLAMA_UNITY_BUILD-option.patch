@@ -1,0 +1,59 @@
+From 0f8fda9ade0b35bcd6482576d82aefc26a9f1cac Mon Sep 17 00:00:00 2001
+From: Adam Duskett <adam.duskett@amarulasolutions.com>
+Date: Wed, 25 Nov 2026 15:40:05 +0100
+Subject: [PATCH] cmake: add LLAMA_UNITY_BUILD option
+
+The llama and mtmd targets force UNITY_BUILD on. The generated unity
+sources #include the original files by absolute path, which leaks the
+build directory into debug source packages. CMAKE_UNITY_BUILD cannot
+override it because the property is set on the target directly.
+
+Add an option, defaulting to ON to keep current behaviour, so
+packagers can disable the unity build.
+
+Upstream-Status: Pending
+Signed-off-by: Adam Duskett <adam.duskett@amarulasolutions.com>
+---
+ CMakeLists.txt            | 1 +
+ src/CMakeLists.txt        | 2 +-
+ tools/mtmd/CMakeLists.txt | 2 +-
+ 3 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7be920f..09967ee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -119,6 +119,7 @@ option(LLAMA_ALL_WARNINGS_3RD_PARTY "llama: enable all compiler warnings in 3rd
+ 
+ # build
+ option(LLAMA_FATAL_WARNINGS "llama: enable -Werror flag" OFF)
++option(LLAMA_UNITY_BUILD    "llama: build model sources as a unity build" ON)
+ 
+ # sanitizers
+ option(LLAMA_SANITIZE_THREAD    "llama: enable thread sanitizer"    OFF)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 426c487..79ac297 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -55,7 +55,7 @@ set_target_properties(llama PROPERTIES
+     VERSION ${LLAMA_VERSION_BASE}
+     SOVERSION ${LLAMA_VERSION_MAJOR}
+     MACHO_CURRENT_VERSION 0 # keep macOS linker from seeing oversized version number
+-    UNITY_BUILD ON
++    UNITY_BUILD ${LLAMA_UNITY_BUILD}
+     UNITY_BUILD_BATCH_SIZE 16
+ )
+ 
+diff --git a/tools/mtmd/CMakeLists.txt b/tools/mtmd/CMakeLists.txt
+index cd9810e..ea7d0be 100644
+--- a/tools/mtmd/CMakeLists.txt
++++ b/tools/mtmd/CMakeLists.txt
+@@ -116,7 +116,7 @@ set_target_properties(mtmd PROPERTIES
+     VERSION ${LLAMA_VERSION_BASE}
+     SOVERSION ${LLAMA_VERSION_MAJOR}
+     MACHO_CURRENT_VERSION 0 # keep macOS linker from seeing oversized version number
+-    UNITY_BUILD ON
++    UNITY_BUILD ${LLAMA_UNITY_BUILD}
+     UNITY_BUILD_BATCH_SIZE 16
+ )
+ 

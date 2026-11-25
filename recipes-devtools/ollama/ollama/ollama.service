@@ -1,0 +1,15 @@
+[Unit]
+Description=Ollama Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=@BINDIR@/ollama serve
+User=ollama
+Group=ollama
+StateDirectory=ollama
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
